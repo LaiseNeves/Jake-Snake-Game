@@ -21,13 +21,13 @@ It's adventure time!
 _______________________________________________________________________________________________________________________________________________________________________________________
 🐝 How to Play
 
-1. Open the game in this link:
+1. Open the game in this link: https://laiseneves.github.io/Little-snake/ 
   
-2. Use W,A,S,D or ___ to move Jack
-  
-3. Catch the sanduiches 🥪
+2. Use the arrow keys or W, A, S, D to move the snake.
 
-4. Don't smash yourself in the walls
+3. Eat the red food to grow.
+
+4. Don't hit the edges or yourself
 
 
 🍭Have fun! 
