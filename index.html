@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,32 +10,28 @@
             margin: 0;
             font-family: Arial, sans-serif;
             text-align: center;
+            background-color: #87CEEB;
         }
-        .intro-screen {
+        .intro-screen, .start-screen, .game-over-screen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100vh;
-            background: url('images/intro.jpg') no-repeat center center/cover;
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 10;
+        }
+        .intro-screen {
+            background: url('images/intro.jpg') no-repeat center center/cover;
             opacity: 1;
             transition: opacity 2s ease-out;
         }
         .start-screen {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
             background: white;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            display: none;
         }
         .background-options {
             display: flex;
@@ -56,27 +53,21 @@
             background-size: cover;
             position: relative;
         }
+        .canvas-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
         canvas {
-            display: block;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.5);
+            background-color: #F4A460;
+            border: 3px solid black;
         }
         .game-over-screen {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
             background: rgba(0, 0, 0, 0.8);
             color: white;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
+            display: none;
         }
         .game-over-screen button {
             padding: 10px 20px;
@@ -84,11 +75,23 @@
             cursor: pointer;
             margin-top: 20px;
         }
+        .scoreboard {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            z-index: 20;
+            background-color: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
     <div class="intro-screen" id="intro-screen"></div>
-    
+
     <div class="start-screen" id="start-screen">
         <h1>Jake Snake Game</h1>
         <p>Choose a background and start playing!</p>
@@ -103,8 +106,14 @@
     </div>
 
     <div class="game-container" id="game-container">
-        <canvas id="gameCanvas" width="600" height="400"></canvas>
-    </div>    
+        <div class="scoreboard">
+            Score: <span id="score">0</span><br>
+            High Score: <span id="highscore">0</span>
+        </div>
+        <div class="canvas-wrapper">
+            <canvas id="gameCanvas" width="400" height="400"></canvas>
+        </div>
+    </div>
 
     <div class="game-over-screen" id="game-over-screen">
         <h1>Game Over!</h1>
@@ -112,7 +121,7 @@
     </div>
 
     <script>
-        window.onload = function() {
+        window.onload = function () {
             document.getElementById('game-over-screen').style.display = 'none';
             setTimeout(() => {
                 document.getElementById('intro-screen').style.opacity = '0';
@@ -124,22 +133,21 @@
         };
 
         let selectedBackground = null;
-        
+
         document.querySelectorAll('.background-option').forEach(img => {
-            img.addEventListener('click', function() {
+            img.addEventListener('click', function () {
                 document.querySelectorAll('.background-option').forEach(i => i.classList.remove('selected'));
                 this.classList.add('selected');
                 selectedBackground = this.getAttribute('data-bg');
             });
         });
 
-        document.getElementById('start-button').addEventListener('click', function() {
+        document.getElementById('start-button').addEventListener('click', function () {
             if (selectedBackground) {
                 localStorage.setItem('snakeBackground', selectedBackground);
                 document.getElementById('start-screen').style.display = 'none';
                 document.getElementById('game-container').style.display = 'block';
                 document.getElementById('game-container').style.backgroundImage = `url(${selectedBackground})`;
-
                 startGame();
             } else {
                 alert('Please select a background!');
@@ -147,81 +155,88 @@
         });
 
         function startGame() {
-            let canvas = document.getElementById('gameCanvas');
-            let ctx = canvas.getContext('2d');
-    
-            let snake = [{ x: 200, y: 200 }]; 
-            let direction = 'right';
-            let food = generateFood();
-            let gameOver = false;
-    
-            function generateFood() {
-                return {
-                    x: Math.floor(Math.random() * (canvas.width / 20)) * 20,
-                    y: Math.floor(Math.random() * (canvas.height / 20)) * 20
-                };
-            }
-    
-            function drawSnake() {
-                ctx.fillStyle = '#FFD700'; // Amarelo do Jake
-                snake.forEach(segment => {
-                    ctx.fillRect(segment.x, segment.y, 20, 20);
-                });
-            }
-    
-            function drawFood() {
-                ctx.fillStyle = 'red';
-                ctx.fillRect(food.x, food.y, 20, 20);
-            }
-    
-            function updateGame() {
-                if (gameOver) return;
+            const canvas = document.getElementById("gameCanvas");
+            const ctx = canvas.getContext("2d");
+            const box = 20;
 
+            let snake = [{ x: 10, y: 10 }];
+            let direction = "RIGHT";
+            let food = { x: 5, y: 5 };
+            let score = 0;
+            let highScore = localStorage.getItem("snakeHighScore") || 0;
+
+            document.getElementById("score").textContent = score;
+            document.getElementById("highscore").textContent = highScore;
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "red";
+                ctx.fillRect(food.x * box, food.y * box, box, box);
+                ctx.fillStyle = "yellow";
+                snake.forEach((segment) => {
+                    ctx.fillRect(segment.x * box, segment.y * box, box, box);
+                    ctx.strokeStyle = "black";
+                    ctx.strokeRect(segment.x * box, segment.y * box, box, box);
+                });
+                document.getElementById("score").textContent = score;
+            }
+
+            function move() {
                 let head = { ...snake[0] };
-    
-                if (direction === 'right') head.x += 20;
-                if (direction === 'left') head.x -= 20;
-                if (direction === 'up') head.y -= 20;
-                if (direction === 'down') head.y += 20;
-    
+                if (direction === "RIGHT") head.x++;
+                if (direction === "LEFT") head.x--;
+                if (direction === "UP") head.y--;
+                if (direction === "DOWN") head.y++;
+
                 if (head.x === food.x && head.y === food.y) {
-                    food = generateFood();
+                    score += 10;
+                    food = {
+                        x: Math.floor(Math.random() * (canvas.width / box)),
+                        y: Math.floor(Math.random() * (canvas.height / box))
+                    };
+                    if (score > highScore) {
+                        highScore = score;
+                        localStorage.setItem("snakeHighScore", highScore);
+                        document.getElementById("highscore").textContent = highScore;
+                    }
                 } else {
                     snake.pop();
                 }
-    
-                if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
-                    endGame();
+
+                if (
+                    head.x < 0 || head.x >= canvas.width / box ||
+                    head.y < 0 || head.y >= canvas.height / box ||
+                    snake.some(segment => segment.x === head.x && segment.y === head.y)
+                ) {
+                    clearInterval(game);
+                    document.getElementById("game-over-screen").style.display = 'flex';
                     return;
                 }
-    
+
                 snake.unshift(head);
-    
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                drawFood();
-                drawSnake();
             }
-    
-            document.addEventListener('keydown', function (event) {
-                if (event.key === 'ArrowRight' && direction !== 'left') direction = 'right';
-                if (event.key === 'ArrowLeft' && direction !== 'right') direction = 'left';
-                if (event.key === 'ArrowUp' && direction !== 'down') direction = 'up';
-                if (event.key === 'ArrowDown' && direction !== 'up') direction = 'down';
+
+            document.addEventListener("keydown", (event) => {
+                const key = event.key.toLowerCase();
+                if ((key === "arrowup" || key === "w") && direction !== "DOWN") direction = "UP";
+                if ((key === "arrowdown" || key === "s") && direction !== "UP") direction = "DOWN";
+                if ((key === "arrowleft" || key === "a") && direction !== "RIGHT") direction = "LEFT";
+                if ((key === "arrowright" || key === "d") && direction !== "LEFT") direction = "RIGHT";
             });
 
-            function endGame() {
-                gameOver = true;
-                document.getElementById('game-over-screen').style.display = 'flex';
+            function gameLoop() {
+                move();
+                draw();
             }
 
-            setInterval(updateGame, 100);
+            let game = setInterval(gameLoop, 150);
         }
 
-        document.getElementById('restart-button').addEventListener('click', function() {
+        document.getElementById('restart-button').addEventListener('click', function () {
             document.getElementById('game-over-screen').style.display = 'none';
-            document.querySelector('.start-screen').style.display = 'flex';
+            document.getElementById('start-screen').style.display = 'flex';
             document.getElementById('game-container').style.display = 'none';
         });
-    </script>    
+    </script>
 </body>
 </html>
