@@ -1,4 +1,4 @@
-# 🦮 Jake Snake Game
+# 🥪 Jake Snake Game
 This game is from Ooh Land 
 
 
