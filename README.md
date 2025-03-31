@@ -1,4 +1,4 @@
-# 🦮 Little-snake
+# 🦮 Jake Snake Game
 This game is from Ooh Land 
 
 
