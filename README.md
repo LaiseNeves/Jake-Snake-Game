@@ -21,7 +21,7 @@ It's adventure time!
 _______________________________________________________________________________________________________________________________________________________________________________________
 🐝 How to Play
 
-1. Open the game in this link: https://laiseneves.github.io/Little-snake/ 
+1. Open the game in this link: [https://laiseneves.github.io/Little-snake/ ](https://laiseneves.github.io/Jake-Snake-Game/)
   
 2. Use the arrow keys or W, A, S, D to move the snake.
 
