@@ -10,14 +10,28 @@
             font-family: Arial, sans-serif;
             text-align: center;
         }
+        .intro-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: url('images/intro.jpg') no-repeat center center/cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            opacity: 1;
+            transition: opacity 2s ease-out;
+        }
         .start-screen {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100vh;
             background: white;
-            display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -59,10 +73,10 @@
             height: 100vh;
             background: rgba(0, 0, 0, 0.8);
             color: white;
-            display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            z-index: 10;
         }
         .game-over-screen button {
             padding: 10px 20px;
@@ -73,7 +87,9 @@
     </style>
 </head>
 <body>
-    <div class="start-screen">
+    <div class="intro-screen" id="intro-screen"></div>
+    
+    <div class="start-screen" id="start-screen">
         <h1>Jake Snake Game</h1>
         <p>Choose a background and start playing!</p>
         <div class="background-options">
@@ -96,6 +112,17 @@
     </div>
 
     <script>
+        window.onload = function() {
+            document.getElementById('game-over-screen').style.display = 'none';
+            setTimeout(() => {
+                document.getElementById('intro-screen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('intro-screen').style.display = 'none';
+                    document.getElementById('start-screen').style.display = 'flex';
+                }, 2000);
+            }, 3000);
+        };
+
         let selectedBackground = null;
         
         document.querySelectorAll('.background-option').forEach(img => {
@@ -109,7 +136,7 @@
         document.getElementById('start-button').addEventListener('click', function() {
             if (selectedBackground) {
                 localStorage.setItem('snakeBackground', selectedBackground);
-                document.querySelector('.start-screen').style.display = 'none';
+                document.getElementById('start-screen').style.display = 'none';
                 document.getElementById('game-container').style.display = 'block';
                 document.getElementById('game-container').style.backgroundImage = `url(${selectedBackground})`;
                 
@@ -117,83 +144,6 @@
             } else {
                 alert('Please select a background!');
             }
-        });
-
-        function startGame() {
-            let canvas = document.getElementById('gameCanvas');
-            let ctx = canvas.getContext('2d');
-    
-            let snake = [{ x: 200, y: 200 }];
-            let direction = 'right';
-            let food = generateFood();
-            let gameOver = false;
-    
-            function generateFood() {
-                return {
-                    x: Math.floor(Math.random() * (canvas.width / 20)) * 20,
-                    y: Math.floor(Math.random() * (canvas.height / 20)) * 20
-                };
-            }
-    
-            function drawSnake() {
-                ctx.fillStyle = '#FFD700'; // Amarelo do Jake
-                snake.forEach(segment => {
-                    ctx.fillRect(segment.x, segment.y, 20, 20);
-                });
-            }
-    
-            function drawFood() {
-                ctx.fillStyle = 'red';
-                ctx.fillRect(food.x, food.y, 20, 20);
-            }
-    
-            function updateGame() {
-                if (gameOver) return;
-
-                let head = { ...snake[0] };
-    
-                if (direction === 'right') head.x += 20;
-                if (direction === 'left') head.x -= 20;
-                if (direction === 'up') head.y -= 20;
-                if (direction === 'down') head.y += 20;
-    
-                if (head.x === food.x && head.y === food.y) {
-                    food = generateFood();
-                } else {
-                    snake.pop();
-                }
-    
-                if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
-                    endGame();
-                    return;
-                }
-    
-                snake.unshift(head);
-    
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                drawFood();
-                drawSnake();
-            }
-    
-            document.addEventListener('keydown', function (event) {
-                if (event.key === 'ArrowRight' && direction !== 'left') direction = 'right';
-                if (event.key === 'ArrowLeft' && direction !== 'right') direction = 'left';
-                if (event.key === 'ArrowUp' && direction !== 'down') direction = 'up';
-                if (event.key === 'ArrowDown' && direction !== 'up') direction = 'down';
-            });
-
-            function endGame() {
-                gameOver = true;
-                document.getElementById('game-over-screen').style.display = 'flex';
-            }
-
-            setInterval(updateGame, 100);
-        }
-
-        document.getElementById('restart-button').addEventListener('click', function() {
-            document.getElementById('game-over-screen').style.display = 'none';
-            document.querySelector('.start-screen').style.display = 'flex';
-            document.getElementById('game-container').style.display = 'none';
         });
     </script>    
 </body>
