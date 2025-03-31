@@ -139,11 +139,88 @@
                 document.getElementById('start-screen').style.display = 'none';
                 document.getElementById('game-container').style.display = 'block';
                 document.getElementById('game-container').style.backgroundImage = `url(${selectedBackground})`;
-                
+
                 startGame();
             } else {
                 alert('Please select a background!');
             }
+        });
+
+        function startGame() {
+            let canvas = document.getElementById('gameCanvas');
+            let ctx = canvas.getContext('2d');
+    
+            let snake = [{ x: 200, y: 200 }]; 
+            let direction = 'right';
+            let food = generateFood();
+            let gameOver = false;
+    
+            function generateFood() {
+                return {
+                    x: Math.floor(Math.random() * (canvas.width / 20)) * 20,
+                    y: Math.floor(Math.random() * (canvas.height / 20)) * 20
+                };
+            }
+    
+            function drawSnake() {
+                ctx.fillStyle = '#FFD700'; // Amarelo do Jake
+                snake.forEach(segment => {
+                    ctx.fillRect(segment.x, segment.y, 20, 20);
+                });
+            }
+    
+            function drawFood() {
+                ctx.fillStyle = 'red';
+                ctx.fillRect(food.x, food.y, 20, 20);
+            }
+    
+            function updateGame() {
+                if (gameOver) return;
+
+                let head = { ...snake[0] };
+    
+                if (direction === 'right') head.x += 20;
+                if (direction === 'left') head.x -= 20;
+                if (direction === 'up') head.y -= 20;
+                if (direction === 'down') head.y += 20;
+    
+                if (head.x === food.x && head.y === food.y) {
+                    food = generateFood();
+                } else {
+                    snake.pop();
+                }
+    
+                if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
+                    endGame();
+                    return;
+                }
+    
+                snake.unshift(head);
+    
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawFood();
+                drawSnake();
+            }
+    
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'ArrowRight' && direction !== 'left') direction = 'right';
+                if (event.key === 'ArrowLeft' && direction !== 'right') direction = 'left';
+                if (event.key === 'ArrowUp' && direction !== 'down') direction = 'up';
+                if (event.key === 'ArrowDown' && direction !== 'up') direction = 'down';
+            });
+
+            function endGame() {
+                gameOver = true;
+                document.getElementById('game-over-screen').style.display = 'flex';
+            }
+
+            setInterval(updateGame, 100);
+        }
+
+        document.getElementById('restart-button').addEventListener('click', function() {
+            document.getElementById('game-over-screen').style.display = 'none';
+            document.querySelector('.start-screen').style.display = 'flex';
+            document.getElementById('game-container').style.display = 'none';
         });
     </script>    
 </body>
